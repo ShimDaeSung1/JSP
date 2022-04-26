@@ -1,0 +1,22 @@
+<%@ page import = "model1.board.BoardDTO" %>
+<%@ page import = "model1.board.BoardDAO" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="IsLoggedIn.jsp" %>
+<%
+String num = request.getParameter("num");
+
+BoardDTO dto = new BoardDTO();
+BoardDAO dao = new BoardDAO(application);
+dto = dao.selectView(num);
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+</body>
+</html>

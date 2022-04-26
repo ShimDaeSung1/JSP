@@ -1,0 +1,31 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file= "IsLoggedIn.jsp" %> <!-- 로그인 확인 -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원제 게시판</title>
+<script type = "text/javascript">
+function validateForm(form){
+	if(form.ti)
+}
+
+</script>
+
+</head>
+<body>
+<jsp:include page="../Common/Link.jsp"/>
+<h2>회원제 게시판 - 글쓰기(Write)</h2>
+<form name = "writeFrm" method="post" action="WriteProcess.jsp" onsubmit="return validateForm(this);">
+	<table border="1" width="90%">
+		<tr>
+			<td>내용</td>
+			<td>
+				<textarea name="content" style="width: 90%"; height: 100px;">
+				</textarea>
+			</td>
+	</table>
+</form>
+</body>
+</html>
