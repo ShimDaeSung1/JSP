@@ -48,6 +48,10 @@ dao.close();  // DB 연결 닫기
 <head>
 <meta charset="UTF-8">
 <title>회원제 게시판</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 <body>
     <jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
@@ -55,21 +59,22 @@ dao.close();  // DB 연결 닫기
     <h2>목록 보기(List) - 현재 페이지 : <%= pageNum %> (전체 : <%= totalPage %>)</h2>
     <!-- 검색폼 -->
     <form method="get">
-    <table border="1" width="90%">
+    <table border="1" width="90%" class ="table">
     <tr>
         <td align="center">
-            <select name="searchField">
-                <option value="title">제목</option>
+            <select name="searchField" class="custom-select" style="width:15%;">
+                <option value="title" >제목</option>
                 <option value="content">내용</option>
             </select>
-            <input type="text" name="searchWord" />
+            <input type="text" name="searchWord" style="width:30%" />
             <input type="submit" value="검색하기" />
         </td>
     </tr>
     </table>
     </form>
     <!-- 게시물 목록 테이블(표) -->
-    <table border="1" width="90%">
+    <table border="1" width="90%" class ="table">
+    <thead class="thead-dark">
         <!-- 각 칼럼의 이름 -->
         <tr>
             <th width="10%">번호</th>
@@ -78,6 +83,7 @@ dao.close();  // DB 연결 닫기
             <th width="10%">조회수</th>
             <th width="15%">작성일</th>
         </tr>
+        </thead>
         <!-- 목록의 내용 -->
 <%
 if (boardLists.isEmpty()) {
@@ -102,7 +108,7 @@ else {
         <tr align="center">
             <td><%= virtualNum %></td>  <!--게시물 번호-->
             <td align="left">  <!--제목(+ 하이퍼링크)-->
-                <a href="View.jsp?num=<%= dto.getNum() %>"><%= dto.getTitle() %></a>
+                <a href="View.jsp?num=<%= dto.getNum() %>" style="color:black;"><%= dto.getTitle() %></a>
             </td>
             <td align="center"><%= dto.getId() %></td>          <!--작성자 아이디-->
             <td align="center"><%= dto.getVisitcount() %></td>  <!--조회수-->
@@ -114,7 +120,7 @@ else {
 %>
     </table>
     <!--목록 하단의 [글쓰기] 버튼-->
-    <table border="1" width="90%">
+    <table border="1" width="90%" class ="table">
         <tr align="center">
             <!--페이징 처리-->
             <td>
