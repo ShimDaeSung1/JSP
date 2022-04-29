@@ -189,17 +189,18 @@ public JDBConnect() {
 
 - 커넥션 풀 설정, 아래 코딩 추가
 ![image](https://user-images.githubusercontent.com/86938974/165971455-35236a87-1598-4ab9-a4be-bb9ba557b1ee.png)
+
 <pre><code>
-<Resource auth="Container" driverClassName="oracle.jdbc.OracleDriver" initialSize="0" maxIdle="20" maxTotal="20" maxWaitMillis="5000" minIdle="5" name="dbcp_myoracle" password="1234" type="javax.sql.DataSource" url="jdbc:oracle:thin:@localhost:1521:xe" username="musthave"/>
+    <Resource auth="Container" driverClassName="oracle.jdbc.OracleDriver" initialSize="0" maxIdle="20"       maxTotal="20" maxWaitMillis="5000" minIdle="5" name="dbcp_myoracle" password="1234"                     type="javax.sql.DataSource" url="jdbc:oracle:thin:@localhost:1521:xe" username="musthave"/>
 </code></pre>
 
 -server.xml은 서버 전체와 관련한 설정, context.xml은 각각의 웹 애플리케이션마다 하나씩 주어지는 자원 설정, server.xml에 커넥션 풀을 전역 자원으로 선언하고, context.xml에서는 이를 참조하는 링크를 추가한다.
 
 ![image](https://user-images.githubusercontent.com/86938974/165971867-0529d9b4-845e-42f2-801b-8f12f1e932c4.png)
 <pre><code>
-<Context>
-<ResourceLink global="dbcp_myoracle" name="dbcp_myoracle" type="javax.sql.DataSource"/>
-</Context>
+    <Context>
+    <ResourceLink global="dbcp_myoracle" name="dbcp_myoracle" type="javax.sql.DataSource"/>
+    </Context>
 </code></pre>
 
 - 커넥션 풀 동작 검증
