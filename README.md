@@ -190,18 +190,12 @@ public JDBConnect() {
 - 커넥션 풀 설정, 아래 코딩 추가
 ![image](https://user-images.githubusercontent.com/86938974/165971455-35236a87-1598-4ab9-a4be-bb9ba557b1ee.png)
 
-<pre><code>
-    <Resource auth="Container" driverClassName="oracle.jdbc.OracleDriver" initialSize="0" maxIdle="20"       maxTotal="20" maxWaitMillis="5000" minIdle="5" name="dbcp_myoracle" password="1234"                     type="javax.sql.DataSource" url="jdbc:oracle:thin:@localhost:1521:xe" username="musthave"/>
-</code></pre>
+![image](https://user-images.githubusercontent.com/86938974/165973731-f04bb5e1-8408-4435-8d7c-8f2c4d99357f.png)
 
 -server.xml은 서버 전체와 관련한 설정, context.xml은 각각의 웹 애플리케이션마다 하나씩 주어지는 자원 설정, server.xml에 커넥션 풀을 전역 자원으로 선언하고, context.xml에서는 이를 참조하는 링크를 추가한다.
 
 ![image](https://user-images.githubusercontent.com/86938974/165971867-0529d9b4-845e-42f2-801b-8f12f1e932c4.png)
-<pre><code>
-    <Context>
-    <ResourceLink global="dbcp_myoracle" name="dbcp_myoracle" type="javax.sql.DataSource"/>
-    </Context>
-</code></pre>
+![image](https://user-images.githubusercontent.com/86938974/165973763-292c5728-de23-43b9-be11-83fc121527ef.png)
 
 - 커넥션 풀 동작 검증
 ![image](https://user-images.githubusercontent.com/86938974/165972173-40ccda28-d14b-4bbf-bb85-fc9087ee64ec.png)
@@ -249,6 +243,219 @@ public class DBConnPool {
 }
 </code></pre>
 *InitialContext : 자바의 네이밍 서비스에서 이름과 실제 객체를 연결해주는 개념, 네이밍 서비스를 이용하기 위한 시작점, 이 객체의 lookup 메서드에 이름을 건네 원하는 객체를 찾아온다.
+
+* 로직
+- 로그인 상태 : 글쓰기, 수정하기, 삭제하기
+- 글쓰기 후 : 목록 이동
+- 수정 후 : 상세 보기 이동
+- 삭제 후 : 목록 이동
+- 페이징 처리
+* 활용 기술
+- 지시어
+- 스크립트 요소(스크립틀릿, 표현식)
+- 내장 객체(request, response, out, session, application)
+- JDBC(DAO/DTO)
+- 자바스크립트
+
+*모델 1 방식
+- 클라이언트의 요청을 받아 JSP(뷰와 컨트롤러)와 자바빈즈(모델) 그리고 DB가 서로 데이터를 주고받아 응답해주는 구조이다.
+* 구현 순서
+- DB생성
+- DTO생성(Model 값 저장)
+- DAO생성(CRUD담당)
+- view생성(jsp) 
+============
+
+*DTO와 DAO준비
+![image](https://user-images.githubusercontent.com/86938974/165974919-2c4b43a5-851d-4012-ae74-d2782bdf5e4b.png)
+
+<pre><code>
+public class BoardDTO {
+    // 멤버 변수 선언
+    private String num;
+    private String title;
+    private String content;
+    private String id;
+    private java.sql.Date postdate;
+    private String visitcount;
+    private String name;
+</code></pre>
+- 멤버 변수 선언 후 [Source] -> [Generate Getters and Setters...]메뉴를 통해 게터와 세터를 자동으로 생성해준다.
+
+<pre><code>
+ // 검색 조건에 맞는 게시물의 개수를 반환합니다.
+    public int selectCount(Map<String, Object> map) {
+        int totalCount = 0; // 결과(게시물 수)를 담을 변수
+
+        // 게시물 수를 얻어오는 쿼리문 작성
+        String query = "SELECT COUNT(*) FROM board";
+        if (map.get("searchWord") != null) {
+            query += " WHERE " + map.get("searchField") + " "
+                   + " LIKE '%" + map.get("searchWord") + "%'";
+        }
+
+        try {
+            stmt = con.createStatement();   // 쿼리문 생성
+            rs = stmt.executeQuery(query);  // 쿼리 실행
+            rs.next();  // 커서를 첫 번째 행으로 이동
+            totalCount = rs.getInt(1);  // 첫 번째 칼럼 값을 가져옴
+        }
+        catch (Exception e) {
+            System.out.println("게시물 수를 구하는 중 예외 발생");
+            e.printStackTrace();
+        }
+
+        return totalCount; 
+    }
+</code></pre>
+
+-다음은 게시물을 가져오는 메서드
+<pre><code>
+// 검색 조건에 맞는 게시물 목록을 반환합니다.
+    public List<BoardDTO> selectList(Map<String, Object> map) { 
+        List<BoardDTO> bbs = new Vector<BoardDTO>();  // 결과(게시물 목록)를 담을 변수
+
+        String query = "SELECT * FROM board "; 
+        if (map.get("searchWord") != null) {
+            query += " WHERE " + map.get("searchField") + " "
+                   + " LIKE '%" + map.get("searchWord") + "%' ";
+        }
+        query += " ORDER BY num DESC "; 
+
+        try {
+            stmt = con.createStatement();   // 쿼리문 생성
+            rs = stmt.executeQuery(query);  // 쿼리 실행
+
+            while (rs.next()) {  // 결과를 순화하며...
+                // 한 행(게시물 하나)의 내용을 DTO에 저장
+                BoardDTO dto = new BoardDTO(); 
+
+                dto.setNum(rs.getString("num"));          // 일련번호
+                dto.setTitle(rs.getString("title"));      // 제목
+                dto.setContent(rs.getString("content"));  // 내용
+                dto.setPostdate(rs.getDate("postdate"));  // 작성일
+                dto.setId(rs.getString("id"));            // 작성자 아이디
+                dto.setVisitcount(rs.getString("visitcount"));  // 조회수
+
+                bbs.add(dto);  // 결과 목록에 저장
+            }
+        } 
+        catch (Exception e) {
+            System.out.println("게시물 조회 중 예외 발생");
+            e.printStackTrace();
+        }
+
+        return bbs;
+    }
+</code></pre>
+- rs.next()로 ResultSet에 저장된 행을 하나씩 불러와 하나의 행의 내용을 DTO객체에 저장 후 List컬렉션에 담아 bbs에 저장하여 JSP로 반환해준다.
+
+*게시물 목록 출력하기
+![image](https://user-images.githubusercontent.com/86938974/165976716-f9d78b72-ee48-4015-90a6-07d94c4aaa6c.png)
+<pre><code>
+<%
+// DAO를 생성해 DB에 연결
+BoardDAO dao = new BoardDAO(application);
+
+// 사용자가 입력한 검색 조건을 Map에 저장
+Map<String, Object> param = new HashMap<String, Object>(); 
+String searchField = request.getParameter("searchField");
+String searchWord = request.getParameter("searchWord");
+if (searchWord != null) {
+    param.put("searchField", searchField);
+    param.put("searchWord", searchWord);
+}
+
+int totalCount = dao.selectCount(param);  // 게시물 수 확인
+List<BoardDTO> boardLists = dao.selectList(param);  // 게시물 목록 받기
+dao.close();  // DB 연결 닫기
+%>
+</code></pre>
+
+*JSP코드
+<pre><code>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원제 게시판</title>
+</head>
+<body>
+    <jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
+
+    <h2>목록 보기(List)</h2>
+    <!-- 검색폼 --> 
+    <form method="get">  
+    <table border="1" width="90%">
+    <tr>
+        <td align="center">
+            <select name="searchField"> 
+                <option value="title">제목</option> 
+                <option value="content">내용</option>
+            </select>
+            <input type="text" name="searchWord" />
+            <input type="submit" value="검색하기" />
+        </td>
+    </tr>   
+    </table>
+    </form>
+    <!-- 게시물 목록 테이블(표) --> 
+    <table border="1" width="90%">
+        <!-- 각 칼럼의 이름 --> 
+        <tr>
+            <th width="10%">번호</th>
+            <th width="50%">제목</th>
+            <th width="15%">작성자</th>
+            <th width="10%">조회수</th>
+            <th width="15%">작성일</th>
+        </tr>
+        <!-- 목록의 내용 --> 
+<%
+if (boardLists.isEmpty()) {
+    // 게시물이 하나도 없을 때 
+%>
+        <tr>
+            <td colspan="5" align="center">
+                등록된 게시물이 없습니다^^*
+            </td>
+        </tr>
+<%
+}
+else {
+    // 게시물이 있을 때 
+    int virtualNum = 0;  // 화면상에서의 게시물 번호
+    for (BoardDTO dto : boardLists)
+    {
+        virtualNum = totalCount--;  // 전체 게시물 수에서 시작해 1씩 감소
+%>
+        <tr align="center">
+            <td><%= virtualNum %></td>  <!--게시물 번호-->
+            <td align="left">  <!--제목(+ 하이퍼링크)-->
+                <a href="View.jsp?num=<%= dto.getNum() %>"><%= dto.getTitle() %></a> 
+            </td>
+            <td align="center"><%= dto.getId() %></td>          <!--작성자 아이디-->
+            <td align="center"><%= dto.getVisitcount() %></td>  <!--조회수-->
+            <td align="center"><%= dto.getPostdate() %></td>    <!--작성일-->
+        </tr>
+<%
+    }
+}
+%>
+    </table>
+    <!--목록 하단의 [글쓰기] 버튼-->
+    <table border="1" width="90%">
+        <tr align="right">
+            <td><button type="button" onclick="location.href='Write.jsp';">글쓰기
+                </button></td>
+        </tr>
+    </table>
+</body>
+</html>
+</code></pre>
+
+
+
+
 
 
 
