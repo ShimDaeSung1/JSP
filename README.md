@@ -375,7 +375,12 @@ dao.close();  // DB 연결 닫기
 
 *JSP코드
 <pre><code>
-
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원제 게시판</title>
+</head>
     <body>
         <jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
 
@@ -446,7 +451,7 @@ dao.close();  // DB 연결 닫기
             </tr>
         </table>
     </body>
-
+</html>
 </code></pre>
 
 - 로그인 정보가 없을 때 로그인 페이지로 이동
@@ -471,8 +476,11 @@ if (session.getAttribute("UserId") == null) {
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ include file="./IsLoggedIn.jsp"%> <!--로그인 확인-->
-
-
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원제 게시판</title>
 <script type="text/javascript">
 function validateForm(form) {  // 폼 내용 검증
     if (form.title.value == "") {
@@ -516,7 +524,8 @@ function validateForm(form) {  // 폼 내용 검증
         </tr>
     </table>
 </form>
-
+</body>
+</html>
 </code></pre>
 - 글쓰기 페이지는 로그인해야 진입 가능하므로 IsLoggedIn.jsp 삽입
 - 자바스크립트 함수를 통해 form의 필수 항목인 title과 content 확인, false를 return해주면 form의 action은 일어나지 않는다.
