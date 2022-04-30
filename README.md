@@ -802,7 +802,7 @@ function validateForm(form) {  // 폼 내용 검증
 </code></pre>
 - 수정하기 페이지에서도 로그인한 상태인지 확인하기 위해 IsLoggedIn.jsp 인크루드한다.
 - hidden 속성의 input 태그를 사용하여 선택된 게시물의 일련번호를 EditProcess.jsp에 그대로 전달하는 역할을 수행
-![image](https://user-images.githubusercontent.com/86938974/166102491-95edfe67-2f75-417a-a16d-96e03ead8753.png)
+
 - 게시물 수정 DAO 준비
 <pre><code>
  // 지정한 게시물을 수정합니다.
@@ -835,7 +835,7 @@ function validateForm(form) {  // 폼 내용 검증
 - 반환하는 값은 업데이트된 행의 개수이다.
 
 - 수정 처리 페이지 작성
-![image](https://user-images.githubusercontent.com/86938974/166102543-a7834b0d-0a0c-4dd7-9612-d9e6595b6c47.png)
+![image](https://user-images.githubusercontent.com/86938974/166104795-8296fd67-71fe-4a36-bcaf-c19c7df66b5e.png)
 <pre><code>
 <%@ page import="model1.board.BoardDAO"%>
 <%@ page import="model1.board.BoardDTO"%>
@@ -918,7 +918,7 @@ function deletePost() {
 </code></pre>
 
 - 삭제 처리 페이지 작성
-![image](https://user-images.githubusercontent.com/86938974/166102748-7e88dcad-c39e-4dc0-8939-2f204ca8c334.png)
+![image](https://user-images.githubusercontent.com/86938974/166104778-8b002e07-f444-45e8-adff-5ba46b589d99.png)
 <pre><code>
 <%@ page import="model1.board.BoardDAO"%>
 <%@ page import="model1.board.BoardDTO"%>
@@ -963,7 +963,7 @@ else {
 - 로그인 아이디와 게시물 작성자가 같은지 확인 후 deletePost()메서드를 호출하여 게시물을 삭제한다.
 - 삭제에 성공하면 목록 페이지로, 실패하면 뒤로 이동한다.
 
-![image](https://user-images.githubusercontent.com/86938974/166102821-aacf1997-ef3f-4f0c-899f-a9df69cf2d21.png)
+![image](https://user-images.githubusercontent.com/86938974/166104774-c73baf16-4b6d-429a-813c-25b85ac59d54.png)
 
 * 페이징 기능 넣기
 - 페이징을 위한 설정
@@ -1107,7 +1107,7 @@ dao.close();  // DB 연결 닫기
 * 바로가기 HTML 코드 생성
 - 목록에 출력할 게시물을 가져왔으니, 화면에 출력하도록 한다.
 - utils/BoardPage.java생성
-![image](https://user-images.githubusercontent.com/86938974/166103837-09c486fa-a050-42d6-9abd-503e56c25986.png)
+![image](https://user-images.githubusercontent.com/86938974/166104760-b65bb718-1d5a-424a-ad95-9e56964269db.png)
 <pre><code>
 package utils;
 
@@ -1181,8 +1181,7 @@ public class BoardPage {
             <!--글쓰기 버튼-->
 </code></pre>
 
-![image](https://user-images.githubusercontent.com/86938974/166104020-ac612c19-c413-4f78-a5fd-4efdbb266538.png)
+![image](https://user-images.githubusercontent.com/86938974/166104742-01f360d1-3c6b-48fa-b471-c6be2f89aeb9.png)
 - 다음블록 링크 누른 후
-![image](https://user-images.githubusercontent.com/86938974/166104034-8f2cb029-4479-458a-ba89-5836db1b2bc2.png)
-
+![image](https://user-images.githubusercontent.com/86938974/166104737-e89665ee-db53-4431-90dc-1ce439af78e1.png)
 
