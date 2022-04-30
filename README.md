@@ -452,6 +452,515 @@ else {
 </body>
 </html>
 </code></pre>
+- 로그인 정보가 없을 때 로그인 페이지로 이동
+![image](https://user-images.githubusercontent.com/86938974/166100949-dc4c951b-b607-46c4-bdda-794ef645fb93.png)
+
+<pre><code>
+<%@ page import="utils.JSFunction"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%
+if (session.getAttribute("UserId") == null) {
+    JSFunction.alertLocation("로그인 후 이용해주십시오.",
+                             "LoginForm.jsp", out);
+    return;
+}
+%>
+</code></pre>
+* 글쓰기 페이지 구현
+![image](https://user-images.githubusercontent.com/86938974/166101648-1f166d01-3cf2-4643-a8ea-8d1ca109eb88.png)
+<pre><code>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="./IsLoggedIn.jsp"%> <!--로그인 확인-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원제 게시판</title>
+<script type="text/javascript">
+function validateForm(form) {  // 폼 내용 검증
+    if (form.title.value == "") {
+        alert("제목을 입력하세요.");
+        form.title.focus();
+        return false;
+    }
+    if (form.content.value == "") {
+        alert("내용을 입력하세요.");
+        form.content.focus();
+        return false;
+    }
+}
+</script>
+</head>
+<body>
+<jsp:include page="Link.jsp" />
+<h2>회원제 게시판 - 글쓰기(Write)</h2>
+<form name="writeFrm" method="post" action="WriteProcess.jsp"
+      onsubmit="return validateForm(this);">
+    <table border="1" width="90%">
+        <tr>
+            <td>제목</td>
+            <td>
+                <input type="text" name="title" style="width: 90%;" />
+            </td>
+        </tr>
+        <tr>
+            <td>내용</td>
+            <td>
+                <textarea name="content" style="width: 90%; height: 100px;"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <button type="submit">작성 완료</button>
+                <button type="reset">다시 입력</button>
+                <button type="button" onclick="location.href='List.jsp';">
+                    목록 보기</button>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
+</code></pre>
+- 글쓰기 페이지는 로그인해야 진입 가능하므로 IsLoggedIn.jsp 삽입
+- 자바스크립트 함수를 통해 form의 필수 항목인 title과 content 확인, false를 return해주면 form의 action은 일어나지 않는다.
+
+- DAO에 글쓰기 메서드 추가
+<pre><code>
+    // 게시글 데이터를 받아 DB에 추가합니다. 
+    public int insertWrite(BoardDTO dto) {
+        int result = 0;
+        
+        try {
+            // INSERT 쿼리문 작성 
+            String query = "INSERT INTO board ( "
+                         + " num,title,content,id,visitcount) "
+                         + " VALUES ( "
+                         + " seq_board_num.NEXTVAL, ?, ?, ?, 0)";  
+
+            psmt = con.prepareStatement(query);  // 동적 쿼리 
+            psmt.setString(1, dto.getTitle());  
+            psmt.setString(2, dto.getContent());
+            psmt.setString(3, dto.getId());  
+            
+            result = psmt.executeUpdate(); 
+        }
+        catch (Exception e) {
+            System.out.println("게시물 입력 중 예외 발생");
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
+</code></pre>
+- BoardDTO타입의 매개변수를 받은 후 데이터를 insert, insert에 성공한 행의 개수 정수로 반환
+
+*글쓰기 처리 페이지 작성
+![image](https://user-images.githubusercontent.com/86938974/166101788-1e8b3108-5c53-4f7c-bcca-4ef9959d2b81.png)
+- 사용자가 글을 입력할 글쓰기 페이지와 글 내용을 데이터베이스에 저장해줄 DAO객체가 준비되었으니 이 둘을 연결해주면 됨
+
+<pre><code>
+<%@ page import="model1.board.BoardDAO"%>
+<%@ page import="model1.board.BoardDTO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="./IsLoggedIn.jsp"%>
+<%
+// 폼값 받기
+String title = request.getParameter("title");
+String content = request.getParameter("content");
+
+// 폼값을 DTO 객체에 저장
+BoardDTO dto = new BoardDTO();
+dto.setTitle(title);
+dto.setContent(content);
+dto.setId(session.getAttribute("UserId").toString());
+
+// DAO 객체를 통해 DB에 DTO 저장
+BoardDAO dao = new BoardDAO(application);
+
+// 기존 코드
+int iResult = dao.insertWrite(dto);
+
+// 더미 데이터를 삽입하기 위한 코드
+// int iResult = 0;
+// for (int i = 1; i <= 100; i++) {
+//     dto.setTitle(title + "-" + i); 
+//     iResult = dao.insertWrite(dto);
+// } 
+
+dao.close();
+
+// 성공 or 실패? 
+if (iResult == 1) {
+    response.sendRedirect("List.jsp");
+} else {
+    JSFunction.alertBack("글쓰기에 실패하였습니다.", out);
+}
+%>
+</code></pre>
+- 전송된 폼값을 DTO객체에 담아 앞에서 작성한 insertWrite()메소드를 호출해 DB에 저장한다. 
+- session영역에 저장된 사용자 id를 DTO에 담은 이유는, board테이블의 id 컬럼은 member테이블의 id 컬럼과 외래키 설정되어 있으므로, id가 빈 값이면 INSERT시 참조 무결성 제약조건 위배가 되기 때문이다.
+* 동작 확인
+![image](https://user-images.githubusercontent.com/86938974/166101955-4051c82e-19ac-440d-b7f9-9a5e460ac5ff.png)
+[확인] 버튼 누르면 로그인 페이지로 이동한다.
+![image](https://user-images.githubusercontent.com/86938974/166101964-b58f4416-927a-435d-807b-5690a49ff1d8.png)
+-로그인 성공 화면
+![image](https://user-images.githubusercontent.com/86938974/166101978-9cee274b-992c-48a5-9638-716e3e246cb6.png)
+- 글쓰기 화면
+![image](https://user-images.githubusercontent.com/86938974/166102005-36c980e6-c964-404e-8227-8ac33a8f44ea.png)
+- 새로 작성한 게시물 등록
+![image](https://user-images.githubusercontent.com/86938974/166102023-d7bab266-ed44-4146-81e5-1c970d070fc0.png)
+* 상세보기
+- 사용자가 선택한 게시물 하나를 조회하여 보여주는 기능이므로 내용을 보려면 목록에서 원하는 게시물의 제목 클릭시, 게시물의 일련번호를 매개변수로 전달하고, 이를 이용해 데이터베이스에서 게시물 내용을 가져온다.
+- DAO 준비
+<pre><code>
+ // 지정한 게시물을 찾아 내용을 반환합니다.
+    public BoardDTO selectView(String num) { 
+        BoardDTO dto = new BoardDTO();
+        
+        // 쿼리문 준비
+        String query = "SELECT B.*, M.name " 
+                     + " FROM member M INNER JOIN board B " 
+                     + " ON M.id=B.id "
+                     + " WHERE num=?";
+
+        try {
+            psmt = con.prepareStatement(query);
+            psmt.setString(1, num);    // 인파라미터를 일련번호로 설정 
+            rs = psmt.executeQuery();  // 쿼리 실행 
+
+            // 결과 처리
+            if (rs.next()) {
+                dto.setNum(rs.getString(1)); 
+                dto.setTitle(rs.getString(2));
+                dto.setContent(rs.getString("content"));
+                dto.setPostdate(rs.getDate("postdate"));
+                dto.setId(rs.getString("id"));
+                dto.setVisitcount(rs.getString(6));
+                dto.setName(rs.getString("name")); 
+            }
+        } 
+        catch (Exception e) {
+            System.out.println("게시물 상세보기 중 예외 발생");
+            e.printStackTrace();
+        }
+        
+        return dto; 
+    }
+</code></pre>
+- ResultSet 객체로 반환된 행을 next()메서드로 확인하고 DTO객체에 저장하여 반환해준다.
+
+- 상세 보기 화면 작성
+![image](https://user-images.githubusercontent.com/86938974/166102145-50ae3ea6-d030-4ef3-9306-98d73efa8a33.png)
+<pre><code>
+<%@ page import="model1.board.BoardDAO"%>
+<%@ page import="model1.board.BoardDTO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+  pageEncoding="UTF-8"%>
+<%
+String num = request.getParameter("num");  // 일련번호 받기
+
+BoardDAO dao = new BoardDAO(application);  // DAO 생성
+dao.updateVisitCount(num);                 // 조회수 증가
+BoardDTO dto = dao.selectView(num);        // 게시물 가져오기
+dao.close();                               // DB 연결 해제
+%>
+
+<body>
+<jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
+
+<h2>회원제 게시판 - 내용 보기(View)</h2>
+<form name="writeFrm">
+    <input type="hidden" name="num" value="<%= num %>" />
+    <table border="1" width="90%">
+        <tr>
+            <td>번호</td>
+            <td><%= dto.getNum() %></td>
+            <td>작성자</td>
+            <td><%= dto.getName() %></td>
+        </tr>
+        <tr>
+            <td>작성일</td>
+            <td><%= dto.getPostdate() %></td>
+            <td>조회수</td>
+            <td><%= dto.getVisitcount() %></td>
+        </tr>
+        <tr>
+            <td>제목</td>
+            <td colspan="3"><%= dto.getTitle() %></td>
+        </tr>
+        <tr>
+            <td>내용</td>
+            <td colspan="3" height="100">
+                <%= dto.getContent().replace("\r\n", "<br/>") %></td>
+        </tr>
+        <tr>
+            <td colspan="4" align="center">
+                <%
+                if (session.getAttribute("UserId") != null
+                    && session.getAttribute("UserId").toString().equals(dto.getId())) {
+                %>
+                <button type="button"
+                        onclick="location.href='Edit.jsp?num=<%= dto.getNum() %>';">
+                    수정하기</button>
+                <button type="button" onclick="deletePost();">삭제하기</button> 
+                <%
+                }
+                %>
+                <button type="button" onclick="location.href='List.jsp';">
+                    목록 보기
+                </button>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
+</code></pre>
+- List.jsp에서 넘겨받은 num 매개변수를 이용해 DAO객체를 생성한 후 조회수를 증가시키고 게시물 가져오기를 실행한다.
+
+*수정하기
+- 수정 폼 작성
+![image](https://user-images.githubusercontent.com/86938974/166102347-c12cf867-819c-42c9-b84c-55b31f890095.png)
+<pre><code>
+<%@ page import="model1.board.BoardDAO"%>
+<%@ page import="model1.board.BoardDTO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="./IsLoggedIn.jsp"%> 
+<%
+String num = request.getParameter("num");  // 일련번호 받기 
+BoardDAO dao = new BoardDAO(application);  // DAO 생성
+BoardDTO dto = dao.selectView(num);        // 게시물 가져오기 
+String sessionId = session.getAttribute("UserId").toString(); // 로그인 ID 얻기 
+if (!sessionId.equals(dto.getId())) {      // 본인인지 확인
+    JSFunction.alertBack("작성자 본인만 수정할 수 있습니다.", out);
+    return;
+}
+dao.close();  // DB 연결 해제
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<jsp:include page="Link.jsp" />
+<title>회원제 게시판</title>
+<script type="text/javascript">
+function validateForm(form) {  // 폼 내용 검증
+    if (form.title.value == "") {
+        alert("제목을 입력하세요.");
+        form.title.focus();
+        return false;
+    }
+    if (form.content.value == "") {
+        alert("내용을 입력하세요.");
+        form.content.focus();
+        return false;
+    }
+}
+</script>
+</head>
+<body>
+<jsp:include page="Link.jsp" />
+<h2>회원제 게시판 - 수정하기(Edit)</h2>
+<form name="writeFrm" method="post" action="EditProcess.jsp"
+      onsubmit="return validateForm(this);">
+    <input type="hidden" name="num" value="<%= dto.getNum() %>" /> 
+    <table border="1" width="90%">
+        <tr>
+            <td>제목</td>
+            <td>
+                <input type="text" name="title" style="width: 90%;" 
+                       value="<%= dto.getTitle() %>"/> 
+            </td>
+        </tr>
+        <tr>
+            <td>내용</td>
+            <td>
+                <textarea name="content" style="width: 90%; height: 100px;"><%= dto.getContent() %></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <button type="submit">작성 완료</button>
+                <button type="reset">다시 입력</button>
+                <button type="button" onclick="location.href='List.jsp';">
+                    목록 보기</button>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
+</code></pre>
+- 수정하기 페이지에서도 로그인한 상태인지 확인하기 위해 IsLoggedIn.jsp 인크루드한다.
+- hidden 속성의 input 태그를 사용하여 선택된 게시물의 일련번호를 EditProcess.jsp에 그대로 전달하는 역할을 수행
+![image](https://user-images.githubusercontent.com/86938974/166102491-95edfe67-2f75-417a-a16d-96e03ead8753.png)
+- 게시물 수정 DAO 준비
+<pre><code>
+ // 지정한 게시물을 수정합니다.
+    public int updateEdit(BoardDTO dto) { 
+        int result = 0;
+        
+        try {
+            // 쿼리문 템플릿 
+            String query = "UPDATE board SET "
+                         + " title=?, content=? "
+                         + " WHERE num=?";
+            
+            // 쿼리문 완성
+            psmt = con.prepareStatement(query);
+            psmt.setString(1, dto.getTitle());
+            psmt.setString(2, dto.getContent());
+            psmt.setString(3, dto.getNum());
+            
+            // 쿼리문 실행 
+            result = psmt.executeUpdate();
+        } 
+        catch (Exception e) {
+            System.out.println("게시물 수정 중 예외 발생");
+            e.printStackTrace();
+        }
+        
+        return result; // 결과 반환 
+    }
+</code></pre>
+- 반환하는 값은 업데이트된 행의 개수이다.
+
+- 수정 처리 페이지 작성
+![image](https://user-images.githubusercontent.com/86938974/166102543-a7834b0d-0a0c-4dd7-9612-d9e6595b6c47.png)
+<pre><code>
+<%@ page import="model1.board.BoardDAO"%>
+<%@ page import="model1.board.BoardDTO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="./IsLoggedIn.jsp"%>
+<%
+// 수정 내용 얻기
+String num = request.getParameter("num");
+String title = request.getParameter("title");
+String content = request.getParameter("content");
+
+// DTO에 저장
+BoardDTO dto = new BoardDTO();
+dto.setNum(num);
+dto.setTitle(title);
+dto.setContent(content);
+
+// DB에 반영
+BoardDAO dao = new BoardDAO(application);
+int affected = dao.updateEdit(dto);
+dao.close();
+
+// 성공/실패 처리
+if (affected == 1) {
+    // 성공 시 상세 보기 페이지로 이동
+    response.sendRedirect("View.jsp?num=" + dto.getNum());
+}
+else {
+    // 실패 시 이전 페이지로 이동
+    JSFunction.alertBack("수정하기에 실패하였습니다.", out);
+}
+%>
+
+</code></pre>
+- 폼값 받은 후 DTO 객체에 저장, DAO객체를 생성해 updateEdit()메서드 호출, 문제없이 수정했다면 1이 반환되어 수정에 성공하면 상세 페이지로, 실패하면 이전 페이지로 이동한다.
+
+* 삭제하기
+- 삭제하기 버튼에 삭제 요청 로직 달기
+- View.jsp에 내용을 추가한다.
+<pre><code>
+function deletePost() {
+    var confirmed = confirm("정말로 삭제하겠습니까?");
+    if (confirmed) {
+        var form = document.writeFrm;       // 이름(name)이 "writeFrm"인 폼 선택
+        form.method = "post";               // 전송 방식
+        form.action = "DeleteProcess.jsp";  // 전송 경로
+        form.submit();                      // 폼값 전송
+    }
+}
+
+<button type="button" onclick="deletePost();">삭제하기</button> 
+</code></pre>
+-삭제하기 버튼을 클릭하면 onclick="deletPost();"코드에 의해 설정된 전송 방식과 전송 경로로 데이터가 전송된다. 이 때 hidden 타입으로 정의한 일련번호도 전송된다.
+
+- 삭제처리를 위한 메서드 DAO클래스에 추가
+<pre><code>
+// 지정한 게시물을 삭제합니다.
+    public int deletePost(BoardDTO dto) { 
+        int result = 0;
+
+        try {
+            // 쿼리문 템플릿
+            String query = "DELETE FROM board WHERE num=?"; 
+
+            // 쿼리문 완성
+            psmt = con.prepareStatement(query); 
+            psmt.setString(1, dto.getNum()); 
+
+            // 쿼리문 실행
+            result = psmt.executeUpdate(); 
+        } 
+        catch (Exception e) {
+            System.out.println("게시물 삭제 중 예외 발생");
+            e.printStackTrace();
+        }
+        
+        return result; // 결과 반환
+    }
+</code></pre>
+
+- 삭제 처리 페이지 작성
+![image](https://user-images.githubusercontent.com/86938974/166102748-7e88dcad-c39e-4dc0-8939-2f204ca8c334.png)
+<pre><code>
+<%@ page import="model1.board.BoardDAO"%>
+<%@ page import="model1.board.BoardDTO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ include file="./IsLoggedIn.jsp"%>
+<%
+String num = request.getParameter("num");  // 일련번호 얻기 
+
+BoardDTO dto = new BoardDTO();             // DTO 객체 생성
+BoardDAO dao = new BoardDAO(application);  // DAO 객체 생성
+dto = dao.selectView(num);  // 주어진 일련번호에 해당하는 기존 게시물 얻기
+
+// 로그인된 사용자 ID 얻기
+String sessionId = session.getAttribute("UserId").toString(); 
+
+int delResult = 0;
+
+if (sessionId.equals(dto.getId())) {  // 작성자가 본인인지 확인 
+    // 작성자가 본인이면...
+    dto.setNum(num);
+    delResult = dao.deletePost(dto);  // 삭제!!! 
+    dao.close();
+
+    // 성공/실패 처리
+    if (delResult == 1) { 
+        // 성공 시 목록 페이지로 이동
+        JSFunction.alertLocation("삭제되었습니다.", "List.jsp", out); 
+    } else {
+        // 실패 시 이전 페이지로 이동
+        JSFunction.alertBack("삭제에 실패하였습니다.", out);
+    } 
+} 
+else { 
+    // 작성자 본인이 아니라면 이전 페이지로 이동
+    JSFunction.alertBack("본인만 삭제할 수 있습니다.", out);
+
+    return;
+}
+%>
+</code></pre>
+- 로그인 아이디와 게시물 작성자가 같은지 확인 후 deletePost()메서드를 호출하여 게시물을 삭제한다.
+- 삭제에 성공하면 목록 페이지로, 실패하면 뒤로 이동한다.
+
+![image](https://user-images.githubusercontent.com/86938974/166102821-aacf1997-ef3f-4f0c-899f-a9df69cf2d21.png)
+
 
 
 
