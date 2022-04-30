@@ -466,8 +466,9 @@ if (session.getAttribute("UserId") == null) {
     return;
 }
 %>
-</code></pre>
+
 * 글쓰기 페이지 구현
+
 ![image](https://user-images.githubusercontent.com/86938974/166101648-1f166d01-3cf2-4643-a8ea-8d1ca109eb88.png)
 <pre><code>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -523,7 +524,7 @@ function validateForm(form) {  // 폼 내용 검증
 </form>
 </body>
 </html>
-</code></pre>
+
 - 글쓰기 페이지는 로그인해야 진입 가능하므로 IsLoggedIn.jsp 삽입
 - 자바스크립트 함수를 통해 form의 필수 항목인 title과 content 확인, false를 return해주면 form의 action은 일어나지 않는다.
 
