@@ -351,6 +351,7 @@ public class BoardDTO {
 - rs.next()로 ResultSet에 저장된 행을 하나씩 불러와 하나의 행의 내용을 DTO객체에 저장 후 List컬렉션에 담아 bbs에 저장하여 JSP로 반환해준다.
 
 *게시물 목록 출력하기
+
 ![image](https://user-images.githubusercontent.com/86938974/165976716-f9d78b72-ee48-4015-90a6-07d94c4aaa6c.png)
 <pre><code>
 <%
@@ -373,7 +374,6 @@ dao.close();  // DB 연결 닫기
 </code></pre>
 
 *JSP코드
-<pre><code>
 <!DOCTYPE html>
 <html>
 <head>
@@ -451,7 +451,7 @@ else {
     </table>
 </body>
 </html>
-</code></pre>
+
 - 로그인 정보가 없을 때 로그인 페이지로 이동
 ![image](https://user-images.githubusercontent.com/86938974/166100949-dc4c951b-b607-46c4-bdda-794ef645fb93.png)
 
