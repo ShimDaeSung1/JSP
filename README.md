@@ -961,11 +961,224 @@ else {
 
 ![image](https://user-images.githubusercontent.com/86938974/166102821-aacf1997-ef3f-4f0c-899f-a9df69cf2d21.png)
 
+* 페이징 기능 넣기
+- 페이징을 위한 설정
+- 두 가지 기본 설정 값
+1. 한 페이지에 출력할 게시물의 개수 (POSTS_PER_PAGE = 10)
+2. 한 화면(블록)에 출력할 페이지의 개수 (PAGES_PER_BLOCK = 5)
 
+*페이징 구현 절차
+- 1단계 : board 테이블에 저장된 전체 레코드 수 카운트 -> 전체 게시물이 105개라 가정
+- 2단계 : 각 페이지에서 출력할 게시물의 범위 계산
+    - 계산식
+        - 범위의 시작 값 : (현재 페이지 -1) * POSTS_PER_PAGE+1
+        - 범위의 종료 값 : (현재 페이지*POSTS_PER_PAGE)
+- 3단계 : 전체 페이지 수 계산
+    이때 계산된 결과는 무조건 올림 처리 -> 마지막 페이지의 게시물 5개도 조회해야 한다.
+    - 계산식
+        - Math.ceil(전체 게시물 수/POSTS_PER_PAGE)
+- 4단계 : '이전 페이지 블록 바로가기' 출력
+    계산식 : ((현재 페이지-1) / PAGES_PER_BLOCK)*PAGES_PER_BLOCK + 1
+- 5단계 : 각 페이지 번호 출력
+    - 단계 4에서 계산한 pageTemp를 BLOCK_PAGE만큼 반복하면서 +1 연산 후 출력
+- 6단계 : '다음 페이지 블록 바로가기' 출력
+    - 각 페이지 번호를 출력한 후 pageTemp +1 하여 다음 페이지 블록 바로가기를 설정
 
+* 더미 데이터 입력 (WriteProcess.jsp)
 
+<pre><code>
+int iResult = 0;
+for (int i = 1; i <= 100; i++) {
+     dto.setTitle(title + "-" + i); 
+     iResult = dao.insertWrite(dto);
+ } 
+</code></pre>
 
+* 페이징용 쿼리문 작성
+- 첫 번째 페이지에 출력할 게시물을 가져오기 위해 rownum은 1~10까지로 지정
+<pre><code>
+select * from(
+    select Tb.*, rownum rNum From(
+        select*from board order by num desc
+    ) tb
+)
+where rNum Between 1 and 10;
+</code></pre>
 
+-DAO 수정
+<pre><code>
+ // 검색 조건에 맞는 게시물 목록을 반환합니다(페이징 기능 지원).
+    public List<BoardDTO> selectListPage(Map<String, Object> map) {
+        List<BoardDTO> bbs = new Vector<BoardDTO>();  // 결과(게시물 목록)를 담을 변수
+        
+        // 쿼리문 템플릿  
+        String query = " SELECT * FROM ( "
+                     + "    SELECT Tb.*, ROWNUM rNum FROM ( "
+                     + "        SELECT * FROM board ";
 
+        // 검색 조건 추가 
+        if (map.get("searchWord") != null) {
+            query += " WHERE " + map.get("searchField")
+                   + " LIKE '%" + map.get("searchWord") + "%' ";
+        }
+        
+        query += "      ORDER BY num DESC "
+               + "     ) Tb "
+               + " ) "
+               + " WHERE rNum BETWEEN ? AND ?"; 
+
+        try {
+            // 쿼리문 완성 
+            psmt = con.prepareStatement(query);
+            psmt.setString(1, map.get("start").toString());
+            psmt.setString(2, map.get("end").toString());
+            
+            // 쿼리문 실행 
+            rs = psmt.executeQuery();
+            
+            while (rs.next()) {
+                // 한 행(게시물 하나)의 데이터를 DTO에 저장
+                BoardDTO dto = new BoardDTO();
+                dto.setNum(rs.getString("num"));
+                dto.setTitle(rs.getString("title"));
+                dto.setContent(rs.getString("content"));
+                dto.setPostdate(rs.getDate("postdate"));
+                dto.setId(rs.getString("id"));
+                dto.setVisitcount(rs.getString("visitcount"));
+
+                // 반환할 결과 목록에 게시물 추가
+                bbs.add(dto);
+            }
+        } 
+        catch (Exception e) {
+            System.out.println("게시물 조회 중 예외 발생");
+            e.printStackTrace();
+        }
+        
+        // 목록 반환
+        return bbs;
+    }
+</code></pre>
+- 앞에서 사용한 rownum을 이용한 쿼리문 작성한다. 
+
+* List.jsp 수정
+- DAO가 준비되었으니 List.jsp에서도 코드를 추가한다.
+- 그에 앞서 페이징 관련 설정값을 web.xml에 정의하도록한다.
+
+<pre><code>
+<context-param>
+  	<param-name>POSTS_PER_PAGE</param-name>
+  	<param-value>10</param-value>
+  </context-param>
+  <context-param>
+  	<param-name>PAGES_PER_BLOCK</param-name>
+  	<param-value>5</param-value>
+  </context-param>
+</code></pre>
+
+-List.jsp에 코드 추가
+<pre><code>
+/*** 페이지 처리 start ***/
+// 전체 페이지 수 계산
+int pageSize = Integer.parseInt(application.getInitParameter("POSTS_PER_PAGE"));
+int blockPage = Integer.parseInt(application.getInitParameter("PAGES_PER_BLOCK"));
+int totalPage = (int)Math.ceil((double)totalCount / pageSize); // 전체 페이지 수
+
+// 현재 페이지 확인
+int pageNum = 1;  // 기본값
+String pageTemp = request.getParameter("pageNum");
+if (pageTemp != null && !pageTemp.equals(""))
+    pageNum = Integer.parseInt(pageTemp); // 요청받은 페이지로 수정
+
+// 목록에 출력할 게시물 범위 계산
+int start = (pageNum - 1) * pageSize + 1;  // 첫 게시물 번호
+int end = pageNum * pageSize; // 마지막 게시물 번호
+param.put("start", start);
+param.put("end", end);
+/*** 페이지 처리 end ***/
+List<BoardDTO> boardLists = dao.selectListPage(param);  // 게시물 목록 받기
+dao.close();  // DB 연결 닫기
+</code></pre>
+
+* 바로가기 HTML 코드 생성
+- 목록에 출력할 게시물을 가져왔으니, 화면에 출력하도록 한다.
+- utils/BoardPage.java생성
+![image](https://user-images.githubusercontent.com/86938974/166103837-09c486fa-a050-42d6-9abd-503e56c25986.png)
+<pre><code>
+package utils;
+
+public class BoardPage {
+    public static String pagingStr(int totalCount, int pageSize, int blockPage,
+            int pageNum, String reqUrl) {
+        String pagingStr = "";
+
+        // 단계 3 : 전체 페이지 수 계산
+        int totalPages = (int) (Math.ceil(((double) totalCount / pageSize)));
+
+        // 단계 4 : '이전 페이지 블록 바로가기' 출력
+        int pageTemp = (((pageNum - 1) / blockPage) * blockPage) + 1;
+        if (pageTemp != 1) {
+            pagingStr += "<a href='" + reqUrl + "?pageNum=1'>[첫 페이지]</a>";
+            pagingStr += "&nbsp;";
+            pagingStr += "<a href='" + reqUrl + "?pageNum=" + (pageTemp - 1)
+                         + "'>[이전 블록]</a>";
+        }
+
+        // 단계 5 : 각 페이지 번호 출력
+        int blockCount = 1;
+        while (blockCount <= blockPage && pageTemp <= totalPages) {
+            if (pageTemp == pageNum) {
+                // 현재 페이지는 링크를 걸지 않음
+                pagingStr += "&nbsp;" + pageTemp + "&nbsp;";
+            } else {
+                pagingStr += "&nbsp;<a href='" + reqUrl + "?pageNum=" + pageTemp
+                             + "'>" + pageTemp + "</a>&nbsp;";
+            }
+            pageTemp++;
+            blockCount++;
+        }
+
+        // 단계 6 : '다음 페이지 블록 바로가기' 출력
+        if (pageTemp <= totalPages) {
+            pagingStr += "<a href='" + reqUrl + "?pageNum=" + pageTemp
+                         + "'>[다음 블록]</a>";
+            pagingStr += "&nbsp;";
+            pagingStr += "<a href='" + reqUrl + "?pageNum=" + totalPages
+                         + "'>[마지막 페이지]</a>";
+        }
+
+        return pagingStr;
+    }
+}
+</code></pre>
+
+*화면 출력
+- List.jsp에 추가
+<pre><code>
+<%@ page import="utils.BoardPage"%>
+
+<h2>목록 보기(List) - 현재 페이지 : <%= pageNum %> (전체 : <%= totalPage %>)</h2>
+
+// 게시물이 있을 때
+    int virtualNum = 0;  // 화면상에서의 게시물 번호
+    int countNum = 0;
+    for (BoardDTO dto : boardLists)
+    {
+        // virtualNumber = totalCount--;  // 전체 게시물 수에서 시작해 1씩 감소
+        virtualNum = totalCount - (((pageNum - 1) * pageSize) + countNum++);
+%>
+
+<tr align="center">
+            <!--페이징 처리-->
+            <td>
+                <%= BoardPage.pagingStr(totalCount, pageSize,
+                       blockPage, pageNum, request.getRequestURI()) %>  
+            </td>
+            <!--글쓰기 버튼-->
+</code></pre>
+
+![image](https://user-images.githubusercontent.com/86938974/166104020-ac612c19-c413-4f78-a5fd-4efdbb266538.png)
+- 다음블록 링크 누른 후
+![image](https://user-images.githubusercontent.com/86938974/166104034-8f2cb029-4479-458a-ba89-5836db1b2bc2.png)
 
 
