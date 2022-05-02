@@ -374,85 +374,85 @@ dao.close();  // DB 연결 닫기
 </code></pre>
 
 *JSP코드
-<pre><code>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>회원제 게시판</title>
-</head>
-    <body>
-        <jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
 
-        <h2>목록 보기(List)</h2>
-        <!-- 검색폼 --> 
-        <form method="get">  
-        <table border="1" width="90%">
-        <tr>
-            <td align="center">
-                <select name="searchField"> 
-                    <option value="title">제목</option> 
-                    <option value="content">내용</option>
-                </select>
-                <input type="text" name="searchWord" />
-                <input type="submit" value="검색하기" />
-            </td>
-        </tr>   
-        </table>
-        </form>
-        <!-- 게시물 목록 테이블(표) --> 
-        <table border="1" width="90%">
-            <!-- 각 칼럼의 이름 --> 
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>회원제 게시판</title>
+    </head>
+        <body>
+            <jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
+
+            <h2>목록 보기(List)</h2>
+            <!-- 검색폼 --> 
+            <form method="get">  
+            <table border="1" width="90%">
             <tr>
-                <th width="10%">번호</th>
-                <th width="50%">제목</th>
-                <th width="15%">작성자</th>
-                <th width="10%">조회수</th>
-                <th width="15%">작성일</th>
-            </tr>
-            <!-- 목록의 내용 --> 
-    <%
-    if (boardLists.isEmpty()) {
-        // 게시물이 하나도 없을 때 
-    %>
-            <tr>
-                <td colspan="5" align="center">
-                    등록된 게시물이 없습니다^^*
+                <td align="center">
+                    <select name="searchField"> 
+                        <option value="title">제목</option> 
+                        <option value="content">내용</option>
+                    </select>
+                    <input type="text" name="searchWord" />
+                    <input type="submit" value="검색하기" />
                 </td>
-            </tr>
-    <%
-    }
-    else {
-        // 게시물이 있을 때 
-        int virtualNum = 0;  // 화면상에서의 게시물 번호
-        for (BoardDTO dto : boardLists)
-        {
-            virtualNum = totalCount--;  // 전체 게시물 수에서 시작해 1씩 감소
-    %>
-            <tr align="center">
-                <td><%= virtualNum %></td>  <!--게시물 번호-->
-                <td align="left">  <!--제목(+ 하이퍼링크)-->
-                    <a href="View.jsp?num=<%= dto.getNum() %>"><%= dto.getTitle() %></a> 
-                </td>
-                <td align="center"><%= dto.getId() %></td>          <!--작성자 아이디-->
-                <td align="center"><%= dto.getVisitcount() %></td>  <!--조회수-->
-                <td align="center"><%= dto.getPostdate() %></td>    <!--작성일-->
-            </tr>
-    <%
+            </tr>   
+            </table>
+            </form>
+            <!-- 게시물 목록 테이블(표) --> 
+            <table border="1" width="90%">
+                <!-- 각 칼럼의 이름 --> 
+                <tr>
+                    <th width="10%">번호</th>
+                    <th width="50%">제목</th>
+                    <th width="15%">작성자</th>
+                    <th width="10%">조회수</th>
+                    <th width="15%">작성일</th>
+                </tr>
+                <!-- 목록의 내용 --> 
+        <%
+        if (boardLists.isEmpty()) {
+            // 게시물이 하나도 없을 때 
+        %>
+                <tr>
+                    <td colspan="5" align="center">
+                        등록된 게시물이 없습니다^^*
+                    </td>
+                </tr>
+        <%
         }
-    }
-    %>
-        </table>
-        <!--목록 하단의 [글쓰기] 버튼-->
-        <table border="1" width="90%">
-            <tr align="right">
-                <td><button type="button" onclick="location.href='Write.jsp';">글쓰기
-                    </button></td>
-            </tr>
-        </table>
-    </body>
-</html>
-</code></pre>
+        else {
+            // 게시물이 있을 때 
+            int virtualNum = 0;  // 화면상에서의 게시물 번호
+            for (BoardDTO dto : boardLists)
+            {
+                virtualNum = totalCount--;  // 전체 게시물 수에서 시작해 1씩 감소
+        %>
+                <tr align="center">
+                    <td><%= virtualNum %></td>  <!--게시물 번호-->
+                    <td align="left">  <!--제목(+ 하이퍼링크)-->
+                        <a href="View.jsp?num=<%= dto.getNum() %>"><%= dto.getTitle() %></a> 
+                    </td>
+                    <td align="center"><%= dto.getId() %></td>          <!--작성자 아이디-->
+                    <td align="center"><%= dto.getVisitcount() %></td>  <!--조회수-->
+                    <td align="center"><%= dto.getPostdate() %></td>    <!--작성일-->
+                </tr>
+        <%
+            }
+        }
+        %>
+            </table>
+            <!--목록 하단의 [글쓰기] 버튼-->
+            <table border="1" width="90%">
+                <tr align="right">
+                    <td><button type="button" onclick="location.href='Write.jsp';">글쓰기
+                        </button></td>
+                </tr>
+            </table>
+        </body>
+    </html>
+
 
 - 로그인 정보가 없을 때 로그인 페이지로 이동
 ![image](https://user-images.githubusercontent.com/86938974/166100949-dc4c951b-b607-46c4-bdda-794ef645fb93.png)
@@ -472,61 +472,61 @@ if (session.getAttribute("UserId") == null) {
 * 글쓰기 페이지 구현
 
 ![image](https://user-images.githubusercontent.com/86938974/166101648-1f166d01-3cf2-4643-a8ea-8d1ca109eb88.png)
-<pre><code>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ include file="./IsLoggedIn.jsp"%> <!--로그인 확인-->
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>회원제 게시판</title>
-<script type="text/javascript">
-function validateForm(form) {  // 폼 내용 검증
-    if (form.title.value == "") {
-        alert("제목을 입력하세요.");
-        form.title.focus();
-        return false;
+
+    <%@ page language="java" contentType="text/html; charset=UTF-8"
+        pageEncoding="UTF-8"%>
+    <%@ include file="./IsLoggedIn.jsp"%> <!--로그인 확인-->
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>회원제 게시판</title>
+    <script type="text/javascript">
+    function validateForm(form) {  // 폼 내용 검증
+        if (form.title.value == "") {
+            alert("제목을 입력하세요.");
+            form.title.focus();
+            return false;
+        }
+        if (form.content.value == "") {
+            alert("내용을 입력하세요.");
+            form.content.focus();
+            return false;
+        }
     }
-    if (form.content.value == "") {
-        alert("내용을 입력하세요.");
-        form.content.focus();
-        return false;
-    }
-}
-</script>
-</head>
-<body>
-<jsp:include page="Link.jsp" />
-<h2>회원제 게시판 - 글쓰기(Write)</h2>
-<form name="writeFrm" method="post" action="WriteProcess.jsp"
-      onsubmit="return validateForm(this);">
-    <table border="1" width="90%">
-        <tr>
-            <td>제목</td>
-            <td>
-                <input type="text" name="title" style="width: 90%;" />
-            </td>
-        </tr>
-        <tr>
-            <td>내용</td>
-            <td>
-                <textarea name="content" style="width: 90%; height: 100px;"></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" align="center">
-                <button type="submit">작성 완료</button>
-                <button type="reset">다시 입력</button>
-                <button type="button" onclick="location.href='List.jsp';">
-                    목록 보기</button>
-            </td>
-        </tr>
-    </table>
-</form>
-</body>
-</html>
-</code></pre>
+    </script>
+    </head>
+    <body>
+    <jsp:include page="Link.jsp" />
+    <h2>회원제 게시판 - 글쓰기(Write)</h2>
+    <form name="writeFrm" method="post" action="WriteProcess.jsp"
+          onsubmit="return validateForm(this);">
+        <table border="1" width="90%">
+            <tr>
+                <td>제목</td>
+                <td>
+                    <input type="text" name="title" style="width: 90%;" />
+                </td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>
+                    <textarea name="content" style="width: 90%; height: 100px;"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <button type="submit">작성 완료</button>
+                    <button type="reset">다시 입력</button>
+                    <button type="button" onclick="location.href='List.jsp';">
+                        목록 보기</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    </body>
+    </html>
+
 
 - 글쓰기 페이지는 로그인해야 진입 가능하므로 IsLoggedIn.jsp 삽입
 - 자바스크립트 함수를 통해 form의 필수 항목인 title과 content 확인, false를 return해주면 form의 action은 일어나지 않는다.
@@ -659,7 +659,7 @@ if (iResult == 1) {
 
 - 상세 보기 화면 작성
 ![image](https://user-images.githubusercontent.com/86938974/166102145-50ae3ea6-d030-4ef3-9306-98d73efa8a33.png)
-<pre><code>
+
 <%@ page import="model1.board.BoardDAO"%>
 <%@ page import="model1.board.BoardDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -676,130 +676,130 @@ dao.close();                               // DB 연결 해제
 <body>
 <jsp:include page="Link.jsp" />  <!-- 공통 링크 -->
 
-<h2>회원제 게시판 - 내용 보기(View)</h2>
-<form name="writeFrm">
-    <input type="hidden" name="num" value="<%= num %>" />
-    <table border="1" width="90%">
-        <tr>
-            <td>번호</td>
-            <td><%= dto.getNum() %></td>
-            <td>작성자</td>
-            <td><%= dto.getName() %></td>
-        </tr>
-        <tr>
-            <td>작성일</td>
-            <td><%= dto.getPostdate() %></td>
-            <td>조회수</td>
-            <td><%= dto.getVisitcount() %></td>
-        </tr>
-        <tr>
-            <td>제목</td>
-            <td colspan="3"><%= dto.getTitle() %></td>
-        </tr>
-        <tr>
-            <td>내용</td>
-            <td colspan="3" height="100">
-                <%= dto.getContent().replace("\r\n", "<br/>") %></td>
-        </tr>
-        <tr>
-            <td colspan="4" align="center">
-                <%
-                if (session.getAttribute("UserId") != null
-                    && session.getAttribute("UserId").toString().equals(dto.getId())) {
-                %>
-                <button type="button"
-                        onclick="location.href='Edit.jsp?num=<%= dto.getNum() %>';">
-                    수정하기</button>
-                <button type="button" onclick="deletePost();">삭제하기</button> 
-                <%
-                }
-                %>
-                <button type="button" onclick="location.href='List.jsp';">
-                    목록 보기
-                </button>
-            </td>
-        </tr>
-    </table>
-</form>
-</body>
-</html>
-</code></pre>
+    <h2>회원제 게시판 - 내용 보기(View)</h2>
+    <form name="writeFrm">
+        <input type="hidden" name="num" value="<%= num %>" />
+        <table border="1" width="90%">
+            <tr>
+                <td>번호</td>
+                <td><%= dto.getNum() %></td>
+                <td>작성자</td>
+                <td><%= dto.getName() %></td>
+            </tr>
+            <tr>
+                <td>작성일</td>
+                <td><%= dto.getPostdate() %></td>
+                <td>조회수</td>
+                <td><%= dto.getVisitcount() %></td>
+            </tr>
+            <tr>
+                <td>제목</td>
+                <td colspan="3"><%= dto.getTitle() %></td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td colspan="3" height="100">
+                    <%= dto.getContent().replace("\r\n", "<br/>") %></td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <%
+                    if (session.getAttribute("UserId") != null
+                        && session.getAttribute("UserId").toString().equals(dto.getId())) {
+                    %>
+                    <button type="button"
+                            onclick="location.href='Edit.jsp?num=<%= dto.getNum() %>';">
+                        수정하기</button>
+                    <button type="button" onclick="deletePost();">삭제하기</button> 
+                    <%
+                    }
+                    %>
+                    <button type="button" onclick="location.href='List.jsp';">
+                        목록 보기
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    </body>
+    </html>
+
 - List.jsp에서 넘겨받은 num 매개변수를 이용해 DAO객체를 생성한 후 조회수를 증가시키고 게시물 가져오기를 실행한다.
 
 *수정하기
 - 수정 폼 작성
 ![image](https://user-images.githubusercontent.com/86938974/166102347-c12cf867-819c-42c9-b84c-55b31f890095.png)
-<pre><code>
-<%@ page import="model1.board.BoardDAO"%>
-<%@ page import="model1.board.BoardDTO"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ include file="./IsLoggedIn.jsp"%> 
-<%
-String num = request.getParameter("num");  // 일련번호 받기 
-BoardDAO dao = new BoardDAO(application);  // DAO 생성
-BoardDTO dto = dao.selectView(num);        // 게시물 가져오기 
-String sessionId = session.getAttribute("UserId").toString(); // 로그인 ID 얻기 
-if (!sessionId.equals(dto.getId())) {      // 본인인지 확인
-    JSFunction.alertBack("작성자 본인만 수정할 수 있습니다.", out);
-    return;
-}
-dao.close();  // DB 연결 해제
-%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<jsp:include page="Link.jsp" />
-<title>회원제 게시판</title>
-<script type="text/javascript">
-function validateForm(form) {  // 폼 내용 검증
-    if (form.title.value == "") {
-        alert("제목을 입력하세요.");
-        form.title.focus();
-        return false;
+
+    <%@ page import="model1.board.BoardDAO"%>
+    <%@ page import="model1.board.BoardDTO"%>
+    <%@ page language="java" contentType="text/html; charset=UTF-8"
+        pageEncoding="UTF-8"%>
+    <%@ include file="./IsLoggedIn.jsp"%> 
+    <%
+    String num = request.getParameter("num");  // 일련번호 받기 
+    BoardDAO dao = new BoardDAO(application);  // DAO 생성
+    BoardDTO dto = dao.selectView(num);        // 게시물 가져오기 
+    String sessionId = session.getAttribute("UserId").toString(); // 로그인 ID 얻기 
+    if (!sessionId.equals(dto.getId())) {      // 본인인지 확인
+        JSFunction.alertBack("작성자 본인만 수정할 수 있습니다.", out);
+        return;
     }
-    if (form.content.value == "") {
-        alert("내용을 입력하세요.");
-        form.content.focus();
-        return false;
+    dao.close();  // DB 연결 해제
+    %>
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <jsp:include page="Link.jsp" />
+    <title>회원제 게시판</title>
+    <script type="text/javascript">
+    function validateForm(form) {  // 폼 내용 검증
+        if (form.title.value == "") {
+            alert("제목을 입력하세요.");
+            form.title.focus();
+            return false;
+        }
+        if (form.content.value == "") {
+            alert("내용을 입력하세요.");
+            form.content.focus();
+            return false;
+        }
     }
-}
-</script>
-</head>
-<body>
-<jsp:include page="Link.jsp" />
-<h2>회원제 게시판 - 수정하기(Edit)</h2>
-<form name="writeFrm" method="post" action="EditProcess.jsp"
-      onsubmit="return validateForm(this);">
-    <input type="hidden" name="num" value="<%= dto.getNum() %>" /> 
-    <table border="1" width="90%">
-        <tr>
-            <td>제목</td>
-            <td>
-                <input type="text" name="title" style="width: 90%;" 
-                       value="<%= dto.getTitle() %>"/> 
-            </td>
-        </tr>
-        <tr>
-            <td>내용</td>
-            <td>
-                <textarea name="content" style="width: 90%; height: 100px;"><%= dto.getContent() %></textarea>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2" align="center">
-                <button type="submit">작성 완료</button>
-                <button type="reset">다시 입력</button>
-                <button type="button" onclick="location.href='List.jsp';">
-                    목록 보기</button>
-            </td>
-        </tr>
-    </table>
-</form>
-</body>
-</html>
-</code></pre>
+    </script>
+    </head>
+    <body>
+    <jsp:include page="Link.jsp" />
+    <h2>회원제 게시판 - 수정하기(Edit)</h2>
+    <form name="writeFrm" method="post" action="EditProcess.jsp"
+          onsubmit="return validateForm(this);">
+        <input type="hidden" name="num" value="<%= dto.getNum() %>" /> 
+        <table border="1" width="90%">
+            <tr>
+                <td>제목</td>
+                <td>
+                    <input type="text" name="title" style="width: 90%;" 
+                           value="<%= dto.getTitle() %>"/> 
+                </td>
+            </tr>
+            <tr>
+                <td>내용</td>
+                <td>
+                    <textarea name="content" style="width: 90%; height: 100px;"><%= dto.getContent() %></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <button type="submit">작성 완료</button>
+                    <button type="reset">다시 입력</button>
+                    <button type="button" onclick="location.href='List.jsp';">
+                        목록 보기</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    </body>
+    </html>
+
 - 수정하기 페이지에서도 로그인한 상태인지 확인하기 위해 IsLoggedIn.jsp 인크루드한다.
 - hidden 속성의 input 태그를 사용하여 선택된 게시물의 일련번호를 EditProcess.jsp에 그대로 전달하는 역할을 수행
 
@@ -836,59 +836,59 @@ function validateForm(form) {  // 폼 내용 검증
 
 - 수정 처리 페이지 작성
 ![image](https://user-images.githubusercontent.com/86938974/166104795-8296fd67-71fe-4a36-bcaf-c19c7df66b5e.png)
-<pre><code>
-<%@ page import="model1.board.BoardDAO"%>
-<%@ page import="model1.board.BoardDTO"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ include file="./IsLoggedIn.jsp"%>
-<%
-// 수정 내용 얻기
-String num = request.getParameter("num");
-String title = request.getParameter("title");
-String content = request.getParameter("content");
 
-// DTO에 저장
-BoardDTO dto = new BoardDTO();
-dto.setNum(num);
-dto.setTitle(title);
-dto.setContent(content);
+    <%@ page import="model1.board.BoardDAO"%>
+    <%@ page import="model1.board.BoardDTO"%>
+    <%@ page language="java" contentType="text/html; charset=UTF-8"
+        pageEncoding="UTF-8"%>
+    <%@ include file="./IsLoggedIn.jsp"%>
+    <%
+    // 수정 내용 얻기
+    String num = request.getParameter("num");
+    String title = request.getParameter("title");
+    String content = request.getParameter("content");
 
-// DB에 반영
-BoardDAO dao = new BoardDAO(application);
-int affected = dao.updateEdit(dto);
-dao.close();
+    // DTO에 저장
+    BoardDTO dto = new BoardDTO();
+    dto.setNum(num);
+    dto.setTitle(title);
+    dto.setContent(content);
 
-// 성공/실패 처리
-if (affected == 1) {
-    // 성공 시 상세 보기 페이지로 이동
-    response.sendRedirect("View.jsp?num=" + dto.getNum());
-}
-else {
-    // 실패 시 이전 페이지로 이동
-    JSFunction.alertBack("수정하기에 실패하였습니다.", out);
-}
-%>
+    // DB에 반영
+    BoardDAO dao = new BoardDAO(application);
+    int affected = dao.updateEdit(dto);
+    dao.close();
 
-</code></pre>
+    // 성공/실패 처리
+    if (affected == 1) {
+        // 성공 시 상세 보기 페이지로 이동
+        response.sendRedirect("View.jsp?num=" + dto.getNum());
+    }
+    else {
+        // 실패 시 이전 페이지로 이동
+        JSFunction.alertBack("수정하기에 실패하였습니다.", out);
+    }
+    %>
+
+
 - 폼값 받은 후 DTO 객체에 저장, DAO객체를 생성해 updateEdit()메서드 호출, 문제없이 수정했다면 1이 반환되어 수정에 성공하면 상세 페이지로, 실패하면 이전 페이지로 이동한다.
 
 * 삭제하기
 - 삭제하기 버튼에 삭제 요청 로직 달기
 - View.jsp에 내용을 추가한다.
-<pre><code>
-function deletePost() {
-    var confirmed = confirm("정말로 삭제하겠습니까?");
-    if (confirmed) {
-        var form = document.writeFrm;       // 이름(name)이 "writeFrm"인 폼 선택
-        form.method = "post";               // 전송 방식
-        form.action = "DeleteProcess.jsp";  // 전송 경로
-        form.submit();                      // 폼값 전송
-    }
-}
 
-<button type="button" onclick="deletePost();">삭제하기</button> 
-</code></pre>
+    function deletePost() {
+        var confirmed = confirm("정말로 삭제하겠습니까?");
+        if (confirmed) {
+            var form = document.writeFrm;       // 이름(name)이 "writeFrm"인 폼 선택
+            form.method = "post";               // 전송 방식
+            form.action = "DeleteProcess.jsp";  // 전송 경로
+            form.submit();                      // 폼값 전송
+        }
+    }
+
+    <button type="button" onclick="deletePost();">삭제하기</button> 
+
 -삭제하기 버튼을 클릭하면 onclick="deletPost();"코드에 의해 설정된 전송 방식과 전송 경로로 데이터가 전송된다. 이 때 hidden 타입으로 정의한 일련번호도 전송된다.
 
 - 삭제처리를 위한 메서드 DAO클래스에 추가
@@ -919,47 +919,47 @@ function deletePost() {
 
 - 삭제 처리 페이지 작성
 ![image](https://user-images.githubusercontent.com/86938974/166104778-8b002e07-f444-45e8-adff-5ba46b589d99.png)
-<pre><code>
-<%@ page import="model1.board.BoardDAO"%>
-<%@ page import="model1.board.BoardDTO"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@ include file="./IsLoggedIn.jsp"%>
-<%
-String num = request.getParameter("num");  // 일련번호 얻기 
 
-BoardDTO dto = new BoardDTO();             // DTO 객체 생성
-BoardDAO dao = new BoardDAO(application);  // DAO 객체 생성
-dto = dao.selectView(num);  // 주어진 일련번호에 해당하는 기존 게시물 얻기
+    <%@ page import="model1.board.BoardDAO"%>
+    <%@ page import="model1.board.BoardDTO"%>
+    <%@ page language="java" contentType="text/html; charset=UTF-8"
+        pageEncoding="UTF-8"%>
+    <%@ include file="./IsLoggedIn.jsp"%>
+    <%
+    String num = request.getParameter("num");  // 일련번호 얻기 
 
-// 로그인된 사용자 ID 얻기
-String sessionId = session.getAttribute("UserId").toString(); 
+    BoardDTO dto = new BoardDTO();             // DTO 객체 생성
+    BoardDAO dao = new BoardDAO(application);  // DAO 객체 생성
+    dto = dao.selectView(num);  // 주어진 일련번호에 해당하는 기존 게시물 얻기
 
-int delResult = 0;
+    // 로그인된 사용자 ID 얻기
+    String sessionId = session.getAttribute("UserId").toString(); 
 
-if (sessionId.equals(dto.getId())) {  // 작성자가 본인인지 확인 
-    // 작성자가 본인이면...
-    dto.setNum(num);
-    delResult = dao.deletePost(dto);  // 삭제!!! 
-    dao.close();
+    int delResult = 0;
 
-    // 성공/실패 처리
-    if (delResult == 1) { 
-        // 성공 시 목록 페이지로 이동
-        JSFunction.alertLocation("삭제되었습니다.", "List.jsp", out); 
-    } else {
-        // 실패 시 이전 페이지로 이동
-        JSFunction.alertBack("삭제에 실패하였습니다.", out);
+    if (sessionId.equals(dto.getId())) {  // 작성자가 본인인지 확인 
+        // 작성자가 본인이면...
+        dto.setNum(num);
+        delResult = dao.deletePost(dto);  // 삭제!!! 
+        dao.close();
+
+        // 성공/실패 처리
+        if (delResult == 1) { 
+            // 성공 시 목록 페이지로 이동
+            JSFunction.alertLocation("삭제되었습니다.", "List.jsp", out); 
+        } else {
+            // 실패 시 이전 페이지로 이동
+            JSFunction.alertBack("삭제에 실패하였습니다.", out);
+        } 
     } 
-} 
-else { 
-    // 작성자 본인이 아니라면 이전 페이지로 이동
-    JSFunction.alertBack("본인만 삭제할 수 있습니다.", out);
+    else { 
+        // 작성자 본인이 아니라면 이전 페이지로 이동
+        JSFunction.alertBack("본인만 삭제할 수 있습니다.", out);
 
-    return;
-}
-%>
-</code></pre>
+        return;
+    }
+    %>
+
 - 로그인 아이디와 게시물 작성자가 같은지 확인 후 deletePost()메서드를 호출하여 게시물을 삭제한다.
 - 삭제에 성공하면 목록 페이지로, 실패하면 뒤로 이동한다.
 
@@ -1070,14 +1070,14 @@ where rNum Between 1 and 10;
 - 그에 앞서 페이징 관련 설정값을 web.xml에 정의하도록한다.
 
 <pre><code>
-<context-param>
-  	<param-name>POSTS_PER_PAGE</param-name>
-  	<param-value>10</param-value>
-  </context-param>
-  <context-param>
-  	<param-name>PAGES_PER_BLOCK</param-name>
-  	<param-value>5</param-value>
-  </context-param>
+    <context-param>
+        <param-name>POSTS_PER_PAGE</param-name>
+        <param-value>10</param-value>
+      </context-param>
+      <context-param>
+        <param-name>PAGES_PER_BLOCK</param-name>
+        <param-value>5</param-value>
+      </context-param>
 </code></pre>
 
 -List.jsp에 코드 추가
