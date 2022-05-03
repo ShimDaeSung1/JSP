@@ -7,15 +7,15 @@ sqlDeveloper 를 사용하여, 사용자 계정 생성 및 권한 설정 진행
 <pre><code></code></pre>
 
 - system 계정으로 접속하여 계정 생성, 접속 권한과 객체 생성 권한을 부여한다.
-<pre><code>
+```
 create user musthave identified by 1234;
 -- drop user musthave;
 grant connect, resource to musthave;
 
 conn musthave/1234;
-
+```
 --system계정에서 사용
-</code></pre>
+```
 
 - 테이블 생성(member테이블과 board테이블) - 회원이 아닌 사람은 글을 게시할 수 없도록 외래키 지정
 <pre><code>
@@ -49,7 +49,7 @@ create sequence seq_board_num
     nocache;
 
 insert into member(id, pass, name) values('musthave','1234','머스트해브');   
-</code></pre>
+```
 
 - JDBC설정 및 데이터베이스 연결
 JDBC로 오라클을 이용하려면 오라클이 제공하는 JDBC드라이버가 필요하다. 오라클을 이미 설치하였으므로 드라이버 파일은 별도로 다운로드 받지 않는다. 다음 경로를 확인하여 jar파일을 찾는다. 그 중 ojdbc6.jar가 오라클 JDBC드라이버이다. 개별 프로젝트의 WEB-INF 하위의 lib 폴더에 추가하면 작업 공간을 변경하거나 배포 시에도 드라이버가 함께 따라간다는 편리함이 있다.
@@ -88,7 +88,7 @@ public class JDBConnect {
 
 - JDBC 드라이버를 메모리에 로드한다. Class의 forName()은 new키워드 대신 클래스명을 통해 직접 객체를 생성한 후 메모리에 로드한다. 인수로는 오라클 드라이버를 넣는다.
 - 그 후 DB에 연결하기 위해 URL, ID, 패스워드를 넣는다. 커넥션 객체를 통해 오라클 연결. close()메서드를 통해 DB관련 작업을 마치고 자원 절약을 위해 연결 해제해준다.
-<pre><code>
+```
 public JDBConnect() {
         try {
             // JDBC 드라이버 로드
@@ -106,13 +106,13 @@ public JDBConnect() {
             e.printStackTrace();
         }
     }
-</code></pre>
+```
 
 - 연결 설정 개선
 - 서버 환경과 관련된 정보들은 한 곳에서 관리하는 것이 좋다. 주로 web.xml에 입력해놓고 필요시 application 내장 객체를 통해 얻어온다.
 - ![image](https://user-images.githubusercontent.com/86938974/165970228-da604235-b5de-4aff-8284-a2d7cbd8ea9a.png)
 
-<pre><code>
+```
 <context-param>
     <param-name>OracleDriver</param-name>
     <param-value>oracle.jdbc.OracleDriver</param-value>
@@ -129,10 +129,10 @@ public JDBConnect() {
     <param-name>OraclePwd</param-name>
     <param-value>1234</param-value>
   </context-param>
-</code></pre>
+```
 
--JDBConnect.java에 두 번째 생성자 추가 - DB접속이 필요할 때마다 동일한 코드를 JSP에서 반복해서 기술해야한다. 
-<pre><code>
+- JDBConnect.java에 두 번째 생성자 추가 - DB접속이 필요할 때마다 동일한 코드를 JSP에서 반복해서 기술해야한다. 
+```
  public JDBConnect(String driver, String url, String id, String pwd) {
         try {
             // JDBC 드라이버 로드
@@ -147,10 +147,10 @@ public JDBConnect() {
             e.printStackTrace();
         }
     }
-</code></pre>
+```
 - JDBConnect.java에 세 번째 생성자 추가 - 생성자는 매개변수로 application (JSP)내장 객체를 받는다.
 
-<pre><code>
+```
  // 세 번째 생성자
     public JDBConnect(ServletContext application) {
         try {
@@ -185,7 +185,7 @@ public JDBConnect() {
             e.printStackTrace();
         }
     }
-</code></pre>
+```
 
 - 커넥션 풀 설정, 아래 코딩 추가
 ![image](https://user-images.githubusercontent.com/86938974/165971455-35236a87-1598-4ab9-a4be-bb9ba557b1ee.png)
@@ -200,7 +200,7 @@ public JDBConnect() {
 - 커넥션 풀 동작 검증
 ![image](https://user-images.githubusercontent.com/86938974/165972173-40ccda28-d14b-4bbf-bb85-fc9087ee64ec.png)
 
-<pre><code>
+```
 public class DBConnPool {
     public Connection con;
     public Statement stmt;
@@ -241,8 +241,8 @@ public class DBConnPool {
         }
     }
 }
-</code></pre>
-*InitialContext : 자바의 네이밍 서비스에서 이름과 실제 객체를 연결해주는 개념, 네이밍 서비스를 이용하기 위한 시작점, 이 객체의 lookup 메서드에 이름을 건네 원하는 객체를 찾아온다.
+```
+* InitialContext : 자바의 네이밍 서비스에서 이름과 실제 객체를 연결해주는 개념, 네이밍 서비스를 이용하기 위한 시작점, 이 객체의 lookup 메서드에 이름을 건네 원하는 객체를 찾아온다.
 
 * 로직
 - 로그인 상태 : 글쓰기, 수정하기, 삭제하기
@@ -257,7 +257,7 @@ public class DBConnPool {
 - JDBC(DAO/DTO)
 - 자바스크립트
 
-*모델 1 방식
+* 모델 1 방식
 - 클라이언트의 요청을 받아 JSP(뷰와 컨트롤러)와 자바빈즈(모델) 그리고 DB가 서로 데이터를 주고받아 응답해주는 구조이다.
 * 구현 순서
 - DB생성
@@ -269,7 +269,7 @@ public class DBConnPool {
 *DTO와 DAO준비
 ![image](https://user-images.githubusercontent.com/86938974/165974919-2c4b43a5-851d-4012-ae74-d2782bdf5e4b.png)
 
-<pre><code>
+```
 public class BoardDTO {
     // 멤버 변수 선언
     private String num;
@@ -279,10 +279,10 @@ public class BoardDTO {
     private java.sql.Date postdate;
     private String visitcount;
     private String name;
-</code></pre>
+```
 - 멤버 변수 선언 후 [Source] -> [Generate Getters and Setters...]메뉴를 통해 게터와 세터를 자동으로 생성해준다.
 
-<pre><code>
+```
  // 검색 조건에 맞는 게시물의 개수를 반환합니다.
     public int selectCount(Map<String, Object> map) {
         int totalCount = 0; // 결과(게시물 수)를 담을 변수
@@ -307,10 +307,10 @@ public class BoardDTO {
 
         return totalCount; 
     }
-</code></pre>
+```
 
 -다음은 게시물을 가져오는 메서드
-<pre><code>
+```
 // 검색 조건에 맞는 게시물 목록을 반환합니다.
     public List<BoardDTO> selectList(Map<String, Object> map) { 
         List<BoardDTO> bbs = new Vector<BoardDTO>();  // 결과(게시물 목록)를 담을 변수
@@ -347,13 +347,13 @@ public class BoardDTO {
 
         return bbs;
     }
-</code></pre>
+```
 - rs.next()로 ResultSet에 저장된 행을 하나씩 불러와 하나의 행의 내용을 DTO객체에 저장 후 List컬렉션에 담아 bbs에 저장하여 JSP로 반환해준다.
 
 *게시물 목록 출력하기
 
 ![image](https://user-images.githubusercontent.com/86938974/165976716-f9d78b72-ee48-4015-90a6-07d94c4aaa6c.png)
-<pre><code>
+```
 <%
 // DAO를 생성해 DB에 연결
 BoardDAO dao = new BoardDAO(application);
@@ -371,10 +371,10 @@ int totalCount = dao.selectCount(param);  // 게시물 수 확인
 List<BoardDTO> boardLists = dao.selectList(param);  // 게시물 목록 받기
 dao.close();  // DB 연결 닫기
 %>
-</code></pre>
+```
 
 *JSP코드
-
+```
     <!DOCTYPE html>
     <html>
     <head>
@@ -452,12 +452,12 @@ dao.close();  // DB 연결 닫기
             </table>
         </body>
     </html>
-
+```
 
 - 로그인 정보가 없을 때 로그인 페이지로 이동
 ![image](https://user-images.githubusercontent.com/86938974/166100949-dc4c951b-b607-46c4-bdda-794ef645fb93.png)
 
-<pre><code>
+```
 <%@ page import="utils.JSFunction"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
@@ -467,12 +467,11 @@ if (session.getAttribute("UserId") == null) {
                              "LoginForm.jsp", out);
     return;
 }
-%>
-</code></pre>
+```
 * 글쓰기 페이지 구현
 
 ![image](https://user-images.githubusercontent.com/86938974/166101648-1f166d01-3cf2-4643-a8ea-8d1ca109eb88.png)
-
+```
     <%@ page language="java" contentType="text/html; charset=UTF-8"
         pageEncoding="UTF-8"%>
     <%@ include file="./IsLoggedIn.jsp"%> <!--로그인 확인-->
@@ -526,13 +525,13 @@ if (session.getAttribute("UserId") == null) {
     </form>
     </body>
     </html>
-
+```
 
 - 글쓰기 페이지는 로그인해야 진입 가능하므로 IsLoggedIn.jsp 삽입
 - 자바스크립트 함수를 통해 form의 필수 항목인 title과 content 확인, false를 return해주면 form의 action은 일어나지 않는다.
 
 - DAO에 글쓰기 메서드 추가
-<pre><code>
+```
     // 게시글 데이터를 받아 DB에 추가합니다. 
     public int insertWrite(BoardDTO dto) {
         int result = 0;
@@ -558,14 +557,14 @@ if (session.getAttribute("UserId") == null) {
         
         return result;
     }
-</code></pre>
+```
 - BoardDTO타입의 매개변수를 받은 후 데이터를 insert, insert에 성공한 행의 개수 정수로 반환
 
-*글쓰기 처리 페이지 작성
+* 글쓰기 처리 페이지 작성
 ![image](https://user-images.githubusercontent.com/86938974/166101788-1e8b3108-5c53-4f7c-bcca-4ef9959d2b81.png)
 - 사용자가 글을 입력할 글쓰기 페이지와 글 내용을 데이터베이스에 저장해줄 DAO객체가 준비되었으니 이 둘을 연결해주면 됨
 
-<pre><code>
+```
 <%@ page import="model1.board.BoardDAO"%>
 <%@ page import="model1.board.BoardDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -604,7 +603,7 @@ if (iResult == 1) {
     JSFunction.alertBack("글쓰기에 실패하였습니다.", out);
 }
 %>
-</code></pre>
+```
 - 전송된 폼값을 DTO객체에 담아 앞에서 작성한 insertWrite()메소드를 호출해 DB에 저장한다. 
 - session영역에 저장된 사용자 id를 DTO에 담은 이유는, board테이블의 id 컬럼은 member테이블의 id 컬럼과 외래키 설정되어 있으므로, id가 빈 값이면 INSERT시 참조 무결성 제약조건 위배가 되기 때문이다.
 * 동작 확인
@@ -620,7 +619,7 @@ if (iResult == 1) {
 * 상세보기
 - 사용자가 선택한 게시물 하나를 조회하여 보여주는 기능이므로 내용을 보려면 목록에서 원하는 게시물의 제목 클릭시, 게시물의 일련번호를 매개변수로 전달하고, 이를 이용해 데이터베이스에서 게시물 내용을 가져온다.
 - DAO 준비
-<pre><code>
+```
  // 지정한 게시물을 찾아 내용을 반환합니다.
     public BoardDTO selectView(String num) { 
         BoardDTO dto = new BoardDTO();
@@ -654,12 +653,12 @@ if (iResult == 1) {
         
         return dto; 
     }
-</code></pre>
+```
 - ResultSet 객체로 반환된 행을 next()메서드로 확인하고 DTO객체에 저장하여 반환해준다.
 
 - 상세 보기 화면 작성
 ![image](https://user-images.githubusercontent.com/86938974/166102145-50ae3ea6-d030-4ef3-9306-98d73efa8a33.png)
-
+```
 <%@ page import="model1.board.BoardDAO"%>
 <%@ page import="model1.board.BoardDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -723,13 +722,13 @@ dao.close();                               // DB 연결 해제
     </form>
     </body>
     </html>
-
+```
 - List.jsp에서 넘겨받은 num 매개변수를 이용해 DAO객체를 생성한 후 조회수를 증가시키고 게시물 가져오기를 실행한다.
 
-*수정하기
+* 수정하기
 - 수정 폼 작성
 ![image](https://user-images.githubusercontent.com/86938974/166102347-c12cf867-819c-42c9-b84c-55b31f890095.png)
-
+```
     <%@ page import="model1.board.BoardDAO"%>
     <%@ page import="model1.board.BoardDTO"%>
     <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -799,12 +798,12 @@ dao.close();                               // DB 연결 해제
     </form>
     </body>
     </html>
-
+```
 - 수정하기 페이지에서도 로그인한 상태인지 확인하기 위해 IsLoggedIn.jsp 인크루드한다.
 - hidden 속성의 input 태그를 사용하여 선택된 게시물의 일련번호를 EditProcess.jsp에 그대로 전달하는 역할을 수행
 
 - 게시물 수정 DAO 준비
-<pre><code>
+```
  // 지정한 게시물을 수정합니다.
     public int updateEdit(BoardDTO dto) { 
         int result = 0;
@@ -831,12 +830,12 @@ dao.close();                               // DB 연결 해제
         
         return result; // 결과 반환 
     }
-</code></pre>
+```
 - 반환하는 값은 업데이트된 행의 개수이다.
 
 - 수정 처리 페이지 작성
 ![image](https://user-images.githubusercontent.com/86938974/166104795-8296fd67-71fe-4a36-bcaf-c19c7df66b5e.png)
-
+```
     <%@ page import="model1.board.BoardDAO"%>
     <%@ page import="model1.board.BoardDTO"%>
     <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -869,14 +868,14 @@ dao.close();                               // DB 연결 해제
         JSFunction.alertBack("수정하기에 실패하였습니다.", out);
     }
     %>
-
+```
 
 - 폼값 받은 후 DTO 객체에 저장, DAO객체를 생성해 updateEdit()메서드 호출, 문제없이 수정했다면 1이 반환되어 수정에 성공하면 상세 페이지로, 실패하면 이전 페이지로 이동한다.
 
 * 삭제하기
 - 삭제하기 버튼에 삭제 요청 로직 달기
 - View.jsp에 내용을 추가한다.
-
+```
     function deletePost() {
         var confirmed = confirm("정말로 삭제하겠습니까?");
         if (confirmed) {
@@ -888,11 +887,11 @@ dao.close();                               // DB 연결 해제
     }
 
     <button type="button" onclick="deletePost();">삭제하기</button> 
-
+```
 -삭제하기 버튼을 클릭하면 onclick="deletPost();"코드에 의해 설정된 전송 방식과 전송 경로로 데이터가 전송된다. 이 때 hidden 타입으로 정의한 일련번호도 전송된다.
 
 - 삭제처리를 위한 메서드 DAO클래스에 추가
-<pre><code>
+```
 // 지정한 게시물을 삭제합니다.
     public int deletePost(BoardDTO dto) { 
         int result = 0;
@@ -915,11 +914,11 @@ dao.close();                               // DB 연결 해제
         
         return result; // 결과 반환
     }
-</code></pre>
+```
 
 - 삭제 처리 페이지 작성
 ![image](https://user-images.githubusercontent.com/86938974/166104778-8b002e07-f444-45e8-adff-5ba46b589d99.png)
-
+```
     <%@ page import="model1.board.BoardDAO"%>
     <%@ page import="model1.board.BoardDTO"%>
     <%@ page language="java" contentType="text/html; charset=UTF-8"
@@ -959,7 +958,7 @@ dao.close();                               // DB 연결 해제
         return;
     }
     %>
-
+```
 - 로그인 아이디와 게시물 작성자가 같은지 확인 후 deletePost()메서드를 호출하여 게시물을 삭제한다.
 - 삭제에 성공하면 목록 페이지로, 실패하면 뒤로 이동한다.
 
@@ -990,27 +989,27 @@ dao.close();                               // DB 연결 해제
 
 * 더미 데이터 입력 (WriteProcess.jsp)
 
-<pre><code>
+```
 int iResult = 0;
 for (int i = 1; i <= 100; i++) {
      dto.setTitle(title + "-" + i); 
      iResult = dao.insertWrite(dto);
  } 
-</code></pre>
+```
 
 * 페이징용 쿼리문 작성
 - 첫 번째 페이지에 출력할 게시물을 가져오기 위해 rownum은 1~10까지로 지정
-<pre><code>
+```
 select * from(
     select Tb.*, rownum rNum From(
         select*from board order by num desc
     ) tb
 )
 where rNum Between 1 and 10;
-</code></pre>
+```
 
 -DAO 수정
-<pre><code>
+```
  // 검색 조건에 맞는 게시물 목록을 반환합니다(페이징 기능 지원).
     public List<BoardDTO> selectListPage(Map<String, Object> map) {
         List<BoardDTO> bbs = new Vector<BoardDTO>();  // 결과(게시물 목록)를 담을 변수
@@ -1062,14 +1061,14 @@ where rNum Between 1 and 10;
         // 목록 반환
         return bbs;
     }
-</code></pre>
+```
 - 앞에서 사용한 rownum을 이용한 쿼리문 작성한다. 
 
 * List.jsp 수정
 - DAO가 준비되었으니 List.jsp에서도 코드를 추가한다.
 - 그에 앞서 페이징 관련 설정값을 web.xml에 정의하도록한다.
 
-<pre><code>
+```
     <context-param>
         <param-name>POSTS_PER_PAGE</param-name>
         <param-value>10</param-value>
@@ -1078,10 +1077,11 @@ where rNum Between 1 and 10;
         <param-name>PAGES_PER_BLOCK</param-name>
         <param-value>5</param-value>
       </context-param>
-</code></pre>
+```
 
--List.jsp에 코드 추가
-<pre><code>
+- List.jsp에 코드 추가
+
+```
 /*** 페이지 처리 start ***/
 // 전체 페이지 수 계산
 int pageSize = Integer.parseInt(application.getInitParameter("POSTS_PER_PAGE"));
@@ -1102,13 +1102,13 @@ param.put("end", end);
 /*** 페이지 처리 end ***/
 List<BoardDTO> boardLists = dao.selectListPage(param);  // 게시물 목록 받기
 dao.close();  // DB 연결 닫기
-</code></pre>
+```
 
 * 바로가기 HTML 코드 생성
 - 목록에 출력할 게시물을 가져왔으니, 화면에 출력하도록 한다.
 - utils/BoardPage.java생성
 ![image](https://user-images.githubusercontent.com/86938974/166104760-b65bb718-1d5a-424a-ad95-9e56964269db.png)
-<pre><code>
+```
 package utils;
 
 public class BoardPage {
@@ -1154,11 +1154,11 @@ public class BoardPage {
         return pagingStr;
     }
 }
-</code></pre>
+```
 
-*화면 출력
+* 화면 출력
 - List.jsp에 추가
-<pre><code>
+```
 <%@ page import="utils.BoardPage"%>
 
 <h2>목록 보기(List) - 현재 페이지 : <%= pageNum %> (전체 : <%= totalPage %>)</h2>
@@ -1179,7 +1179,7 @@ public class BoardPage {
                        blockPage, pageNum, request.getRequestURI()) %>  
             </td>
             <!--글쓰기 버튼-->
-</code></pre>
+```
 
 ![image](https://user-images.githubusercontent.com/86938974/166104742-01f360d1-3c6b-48fa-b471-c6be2f89aeb9.png)
 - 다음블록 링크 누른 후
