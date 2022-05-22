@@ -4,8 +4,6 @@
 * 오라클 사용, JDBC API를 이용해서 JSP와 연동
 sqlDeveloper 를 사용하여, 사용자 계정 생성 및 권한 설정 진행
 
-<pre><code></code></pre>
-
 - system 계정으로 접속하여 계정 생성, 접속 권한과 객체 생성 권한을 부여한다.
 ```
 create user musthave identified by 1234;
@@ -13,12 +11,11 @@ create user musthave identified by 1234;
 grant connect, resource to musthave;
 
 conn musthave/1234;
-```
 --system계정에서 사용
 ```
 
 - 테이블 생성(member테이블과 board테이블) - 회원이 아닌 사람은 글을 게시할 수 없도록 외래키 지정
-<pre><code>
+```
 create table member (
     id varchar2(10) primary key,
     pass varchar2(10) not null,
@@ -64,7 +61,7 @@ JDBC드라이버를 이용하여 DB와의 연결을 관리하는 클래스 작�
  Java Resources -> common -> JDBConnect.java 생성
   ![image](https://user-images.githubusercontent.com/86938974/165968945-9a6c6b3b-7387-4297-809a-9c47c49164cc.png)
   
-<pre><code>
+```
   package common;
 
 import java.sql.Connection;
@@ -80,7 +77,7 @@ public class JDBConnect {
     public Statement stmt;  
     public PreparedStatement psmt;  
     public ResultSet rs;
-</code></pre>
+```
 *Connection : 데이터베이스와 연결 담당
 *Statement : 인파라미터가 없는 정적 쿼리문 실행
 *PreparedStatement : 인파라미터가 있는 동적 쿼리문 실행
@@ -350,7 +347,7 @@ public class BoardDTO {
 ```
 - rs.next()로 ResultSet에 저장된 행을 하나씩 불러와 하나의 행의 내용을 DTO객체에 저장 후 List컬렉션에 담아 bbs에 저장하여 JSP로 반환해준다.
 
-*게시물 목록 출력하기
+* 게시물 목록 출력하기
 
 ![image](https://user-images.githubusercontent.com/86938974/165976716-f9d78b72-ee48-4015-90a6-07d94c4aaa6c.png)
 ```
